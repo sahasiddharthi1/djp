@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ShopFlow Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#07070f;--sur:#0d0d1a;--bor:#1a1a2e;--grn:#00ff88;--pur:#7c6cfc;--yel:#ffb344;--red:#ff4466;--cyn:#00e5ff;--txt:#e8e8f0;--mut:#5a5a78;--mo:'Space Mono',monospace;--ui:'Syne',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:var(--ui);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,136,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,.015) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:0}
+nav{position:sticky;top:0;z-index:100;background:rgba(7,7,15,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+.tabs{display:flex}
+.tab{padding:15px 18px;font-family:var(--mo);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.tab:hover{color:var(--txt)}.tab.on{color:var(--grn);border-bottom-color:var(--grn)}
+.nr{display:flex;align-items:center;gap:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--grn);box-shadow:0 0 8px var(--grn);animation:blink 1.5s infinite}
+.dot.off{background:var(--red);box-shadow:0 0 8px var(--red);animation:none}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.aurl{background:var(--sur);border:1px solid var(--bor);color:var(--grn);font-family:var(--mo);font-size:11px;padding:5px 10px;width:190px;outline:none}
+.aurl:focus{border-color:var(--grn)}
+#stxt{font-family:var(--mo);font-size:10px;color:var(--mut)}
+.pg{display:none;position:relative;z-index:1;padding:20px 24px;max-width:1600px;margin:0 auto}
+.pg.on{display:block}
+.sr{display:grid;gap:10px;margin-bottom:14px}
+.sc{background:var(--sur);border:1px solid var(--bor);padding:14px 16px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.sc.g::before{background:var(--grn)}.sc.p::before{background:var(--pur)}.sc.y::before{background:var(--yel)}.sc.r::before{background:var(--red)}.sc.c::before{background:var(--cyn)}
+.sl{font-family:var(--mo);font-size:9px;letter-spacing:.14em;color:var(--mut);text-transform:uppercase;margin-bottom:5px}
+.sv{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.sc.g .sv{color:var(--grn)}.sc.p .sv{color:var(--pur)}.sc.y .sv{color:var(--yel)}.sc.r .sv{color:var(--red)}.sc.c .sv{color:var(--cyn)}
+.ss{font-family:var(--mo);font-size:9px;color:var(--mut);margin-top:3px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pnl{background:var(--sur);border:1px solid var(--bor)}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--bor)}
+.pt{font-family:var(--mo);font-size:9px;letter-spacing:.14em;color:var(--mut);text-transform:uppercase}
+.pb{padding:14px}.scroll{max-height:260px;overflow-y:auto}
+.fl{font-family:var(--mo);font-size:9px;letter-spacing:.1em;color:var(--mut);text-transform:uppercase;margin-bottom:4px;display:block}
+.fi,.fs,.ft{width:100%;background:var(--bg);border:1px solid var(--bor);color:var(--txt);font-family:var(--mo);font-size:11px;padding:7px 10px;outline:none;margin-bottom:10px;transition:border-color .2s}
+.fi:focus,.fs:focus,.ft:focus{border-color:var(--grn)}
+.ft{resize:vertical;min-height:75px}.fs option{background:var(--bg)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 16px;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;border:none;transition:all .2s}
+.bg{background:var(--grn);color:#000;width:100%}
+.bp{background:var(--pur);color:#fff;width:100%}
+.bh{background:transparent;border:1px solid var(--bor);color:var(--mut);font-size:10px;padding:4px 10px;width:auto}
+.bh:hover{border-color:var(--grn);color:var(--grn)}
+.br{background:var(--red);color:#fff;padding:4px 10px;font-size:10px;width:auto}
+table{width:100%;border-collapse:collapse}
+th{font-family:var(--mo);font-size:9px;letter-spacing:.12em;color:var(--mut);text-transform:uppercase;text-align:left;padding:0 9px 7px;border-bottom:1px solid var(--bor)}
+td{font-family:var(--mo);font-size:11px;padding:7px 9px;border-bottom:1px solid rgba(26,26,46,.5);vertical-align:middle}
+tr:hover td{background:rgba(0,255,136,.02)}
+.bd{display:inline-block;padding:1px 6px;font-size:9px;font-family:var(--mo);letter-spacing:.08em;text-transform:uppercase;border:1px solid}
+.bok{color:var(--grn);border-color:rgba(0,255,136,.3);background:rgba(0,255,136,.07)}
+.berr{color:var(--red);border-color:rgba(255,68,102,.3);background:rgba(255,68,102,.07)}
+.brun{color:var(--pur);border-color:rgba(124,108,252,.3);background:rgba(124,108,252,.07)}
+.pg-g{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.pc{background:var(--bg);border:1px solid var(--bor);padding:9px;text-align:center;transition:border-color .3s}
+.pc.on{border-color:var(--grn)}
+.pcl{font-family:var(--mo);font-size:8px;color:var(--mut);margin-bottom:3px}
+.pcn{font-size:16px;font-weight:800;color:var(--grn)}
+.pbar{height:2px;background:var(--bor);margin-top:5px}
+.pbf{height:100%;background:var(--grn);transition:width .4s}
+.tr-row{padding:9px 12px;border-bottom:1px solid var(--bor);cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .15s}
+.tr-row:hover{background:rgba(0,255,136,.03)}
+.tr-name{font-family:var(--mo);font-size:10px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tr-dur{font-family:var(--mo);font-size:10px;color:var(--cyn);width:60px;text-align:right;flex-shrink:0}
+.tr-t{font-family:var(--mo);font-size:9px;color:var(--mut);width:75px;text-align:right;flex-shrink:0}
+.flame-row{display:flex;height:20px;margin-bottom:2px}
+.fb{height:18px;display:flex;align-items:center;padding:0 5px;font-family:var(--mo);font-size:9px;overflow:hidden;white-space:nowrap;cursor:pointer;border-radius:1px;flex-shrink:0;transition:opacity .15s}
+.fb:hover{opacity:.75}
+.fok{background:rgba(0,255,136,.2);color:var(--grn);border:1px solid rgba(0,255,136,.25)}
+.ferr{background:rgba(255,68,102,.2);color:var(--red);border:1px solid rgba(255,68,102,.25)}
+.p95b{height:3px;background:var(--bor)}.p95f{height:100%;background:var(--cyn);transition:width .4s}
+.toasts{position:fixed;bottom:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:5px}
+.toast{background:var(--sur);border:1px solid var(--bor);border-left:3px solid var(--grn);padding:9px 14px;font-family:var(--mo);font-size:11px;max-width:280px;animation:si .2s ease}
+.toast.e{border-left-color:var(--red)}
+@keyframes si{from{transform:translateX(28px);opacity:0}to{transform:none;opacity:1}}
+.mt{margin-top:12px}
+.empty{text-align:center;padding:20px;font-family:var(--mo);font-size:10px;color:var(--mut)}
+/* SHOP STYLES */
+.auth-wrap{max-width:420px;margin:60px auto}
+.auth-tabs{display:flex;border-bottom:1px solid var(--bor);margin-bottom:16px}
+.at{padding:10px 20px;font-family:var(--mo);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);cursor:pointer;border-bottom:2px solid transparent}
+.at.on{color:var(--grn);border-bottom-color:var(--grn)}
+.user-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.2);margin-bottom:16px}
+.stitle{font-family:var(--mo);font-size:9px;letter-spacing:.14em;color:var(--mut);text-transform:uppercase;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--bor)}
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.prod-card{background:var(--sur);border:1px solid var(--bor);padding:14px;cursor:pointer;transition:border-color .2s;position:relative}
+.prod-card:hover{border-color:var(--pur)}
+.prod-card.sel{border-color:var(--grn)}
+.prod-name{font-weight:700;font-size:13px;margin-bottom:4px}
+.prod-price{font-family:var(--mo);font-size:16px;color:var(--grn);font-weight:700}
+.prod-cat{font-family:var(--mo);font-size:9px;color:var(--mut);text-transform:uppercase;margin-bottom:8px}
+.cart-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bor)}
+.qbtn{background:var(--bor);border:none;color:var(--txt);width:24px;height:24px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.qbtn:hover{background:var(--pur)}
+.order-card{background:var(--bg);border:1px solid var(--bor);padding:12px;margin-bottom:8px}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bor)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="tabs">
+    <div class="tab on" id="tab-shop" onclick="showPage('shop',this)">🛒 Shop</div>
+    <div class="tab" id="tab-jobs" onclick="showPage('jobs',this)">⚡ Jobs</div>
+    <div class="tab" id="tab-apm" onclick="showPage('apm',this)">🔍 Traces</div>
+    <div class="tab" id="tab-perf" onclick="showPage('perf',this)">📈 Performance</div>
+    <div class="tab" id="tab-rt" onclick="showPage('rt',this)">🖥 Runtime</div>
+  </div>
+  <div class="nr">
+    <div class="dot" id="dot"></div>
+    <span id="stxt">connecting…</span>
+    <input class="aurl" id="aurl" value="http://localhost:3000"/>
+  </div>
+</nav>
+
+<!-- ═══════════════ SHOP ═══════════════ -->
+<div class="pg on" id="pg-shop">
+  <!-- AUTH -->
+  <div id="auth-section">
+    <div class="auth-wrap">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:32px;font-weight:800;color:var(--grn)">ShopFlow</div>
+        <div style="font-family:var(--mo);font-size:10px;color:var(--mut);margin-top:4px">sign in to start shopping</div>
+      </div>
+      <div class="pnl">
+        <div class="auth-tabs">
+          <div class="at on" onclick="authTab('login',this)">Login</div>
+          <div class="at" onclick="authTab('register',this)">Register</div>
+        </div>
+        <div id="login-form" class="pb">
+          <label class="fl">Email</label>
+          <input class="fi" id="l-email" type="email" placeholder="sid@test.com"/>
+          <label class="fl">Password</label>
+          <input class="fi" id="l-pass" type="password" placeholder="••••••"/>
+          <button class="btn bg" onclick="doLogin()">🔐 Login</button>
+        </div>
+        <div id="register-form" class="pb" style="display:none">
+          <label class="fl">Full Name</label>
+          <input class="fi" id="r-name" placeholder="Siddharth"/>
+          <label class="fl">Email</label>
+          <input class="fi" id="r-email" type="email" placeholder="sid@test.com"/>
+          <label class="fl">Password</label>
+          <input class="fi" id="r-pass" type="password" placeholder="min 6 characters"/>
+          <button class="btn bg" onclick="doRegister()">✨ Create Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOP UI -->
+  <div id="shop-section" style="display:none">
+    <div class="user-bar">
+      <div style="font-family:var(--mo);font-size:11px;color:var(--grn)">👤 <span id="sh-name">—</span> &nbsp;·&nbsp; <span id="sh-email" style="color:var(--mut)">—</span></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-family:var(--mo);font-size:9px;color:var(--pur)">JWT ✓</span>
+        <button class="btn bh" onclick="doLogout()">Logout</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--bor)">
+      <div class="at on" onclick="shopTab('products',this)">🛍 Products</div>
+      <div class="at" onclick="shopTab('cart',this)">🛒 Cart <span id="cart-count" style="color:var(--grn)"></span></div>
+      <div class="at" onclick="shopTab('orders',this)">📦 My Orders</div>
+      <div class="at" onclick="shopTab('reports',this)">📊 Reports</div>
+      <div class="at" onclick="shopTab('profile',this)">👤 Profile</div>
+    </div>
+    <div id="sh-products">
+      <div class="stitle">Browse Products</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input class="fi" id="prod-search" placeholder="search…" oninput="filterProducts()" style="margin-bottom:0;max-width:200px"/>
+        <select class="fs" id="prod-cat" onchange="filterProducts()" style="margin-bottom:0;max-width:160px">
+          <option value="">All Categories</option>
+          <option>electronics</option><option>footwear</option><option>appliances</option><option>fitness</option>
+        </select>
+        <button class="btn bh" onclick="loadProducts()">↻</button>
+      </div>
+      <div class="prod-grid" id="prod-grid"><div class="empty">Loading…</div></div>
+    </div>
+    <div id="sh-cart" style="display:none">
+      <div class="g2">
+        <div>
+          <div class="stitle">Cart Items</div>
+          <div id="cart-items"><div class="empty">Cart is empty</div></div>
+        </div>
+        <div class="pnl">
+          <div class="ph"><span class="pt">🧾 Order Summary</span></div>
+          <div class="pb">
+            <div id="cart-summary" style="font-family:var(--mo);font-size:11px;margin-bottom:16px;color:var(--mut)">Add items to see summary</div>
+            <label class="fl">Shipping Address</label>
+            <textarea class="ft" id="sh-addr" style="min-height:60px">123 Main St, Hyderabad, Telangana</textarea>
+            <button class="btn bg" id="place-btn" onclick="placeOrder()">🛒 Place Order</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="sh-orders" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="stitle" style="margin-bottom:0">My Orders</div>
+        <button class="btn bh" onclick="loadOrders()">↻ Refresh</button>
+      </div>
+      <div id="orders-list"><div class="empty">No orders yet</div></div>
+    </div>
+    <div id="sh-reports" style="display:none">
+      <div class="g2">
+        <div class="pnl">
+          <div class="ph"><span class="pt">📊 Generate Report</span></div>
+          <div class="pb">
+            <label class="fl">Report Type</label>
+            <select class="fs" id="rep-type">
+              <option value="order-history">Order History</option>
+              <option value="spending-summary">Spending Summary</option>
+              <option value="product-report">Product Report</option>
+            </select>
+            <button class="btn bp" onclick="generateReport()">📊 Generate</button>
+            <div style="font-family:var(--mo);font-size:9px;color:var(--mut);margin-top:8px">Runs as a background job — check status below</div>
+          </div>
+        </div>
+        <div class="pnl">
+          <div class="ph"><span class="pt">📋 My Reports</span><button class="btn bh" onclick="loadReports()">↻</button></div>
+          <div class="pb scroll" id="reports-list"><div class="empty">No reports yet</div></div>
+        </div>
+      </div>
+    </div>
+    <div id="sh-profile" style="display:none">
+      <div class="g2">
+        <div class="pnl">
+          <div class="ph"><span class="pt">👤 My Profile</span></div>
+          <div class="pb">
+            <label class="fl">Name</label><input class="fi" id="p-name"/>
+            <label class="fl">Email</label><input class="fi" id="p-email"/>
+            <button class="btn bg" onclick="updateProfile()">💾 Save</button>
+          </div>
+        </div>
+        <div class="pnl">
+          <div class="ph"><span class="pt">📈 My Stats</span></div>
+          <div class="pb" id="profile-stats"><div class="empty">Loading…</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ JOBS ═══════════════ -->
+<div class="pg" id="pg-jobs">
+  <div class="sr" style="grid-template-columns:repeat(6,1fr)">
+    <div class="sc g"><div class="sl">Completed</div><div class="sv" id="sc">—</div><div class="ss">total done</div></div>
+    <div class="sc p"><div class="sl">Processing</div><div class="sv" id="sp">—</div><div class="ss">active now</div></div>
+    <div class="sc y"><div class="sl">Queue Depth</div><div class="sv" id="sq">—</div><div class="ss">pending</div></div>
+    <div class="sc y"><div class="sl">Scheduled</div><div class="sv" id="ss2">—</div><div class="ss">delayed</div></div>
+    <div class="sc r"><div class="sl">DLQ</div><div class="sv" id="sd">—</div><div class="ss">dead jobs</div></div>
+    <div class="sc p"><div class="sl">Workers</div><div class="sv" id="sw">—</div><div class="ss" id="su">autoscaling</div></div>
+  </div>
+  <div class="g2">
+    <div class="pnl">
+      <div class="ph"><span class="pt">⚡ Enqueue Job</span></div>
+      <div class="pb">
+        <label class="fl">Job Type</label>
+        <select class="fs" id="jt"><option>send-email</option><option>process-image</option><option>send-webhook</option><option>generate-report</option><option>generate-invoice</option><option>__ping</option></select>
+        <div class="fr"><div><label class="fl">Partition Key</label><input class="fi" id="jpk" value="user-123"/></div><div><label class="fl">Priority</label><input class="fi" id="jpr" type="number" value="5" min="1" max="10"/></div></div>
+        <label class="fl">Payload (JSON)</label>
+        <textarea class="ft" id="jpl">{ "to": "test@example.com", "subject": "Hello!" }</textarea>
+        <div class="fr"><div><label class="fl">Run At</label><input class="fi" id="jra" type="datetime-local"/></div><div><label class="fl">Dedup ID</label><input class="fi" id="jdd" placeholder="idempotency key"/></div></div>
+        <button class="btn bg" onclick="enqueue()">▶ Enqueue Job</button>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bor)">
+          <div class="fl">Batch Load Test</div>
+          <div class="fr" style="margin-top:5px"><input class="fi" id="jbn" type="number" value="50" min="1" max="500" style="margin-bottom:0"/><button class="btn bh" style="width:100%" onclick="batch()">⚡ Fire Batch</button></div>
+          <div id="bwrap" style="display:none;margin-top:7px"><div class="fl" id="blbl">…</div><div style="height:2px;background:var(--bor);margin-top:3px"><div id="bbar" style="height:100%;background:var(--grn);width:0;transition:width .1s"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="pnl"><div class="ph"><span class="pt">🗂 Partitions</span></div><div class="pb"><div class="pg-g" id="pgrid">Loading…</div></div></div>
+      <div class="pnl mt"><div class="ph"><span class="pt">⚙ Workers</span><span id="wu" style="font-family:var(--mo);font-size:10px;color:var(--pur)">—</span></div><div class="pb scroll" id="wlist"><div class="empty">No workers</div></div></div>
+      <div class="pnl mt"><div class="ph"><span class="pt">💀 Dead Letter Queue</span><button class="btn bh" onclick="fetchDLQ()">↻</button></div><div class="pb scroll" id="dlqlist"><div class="empty">No dead jobs ✓</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ APM TRACES ═══════════════ -->
+<div class="pg" id="pg-apm">
+  <div class="sr" style="grid-template-columns:repeat(4,1fr)">
+    <div class="sc c"><div class="sl">Total Traces</div><div class="sv" id="at">—</div></div>
+    <div class="sc r"><div class="sl">Error Traces</div><div class="sv" id="ae">—</div></div>
+    <div class="sc y"><div class="sl">Slow Traces</div><div class="sv" id="as">—</div></div>
+    <div class="sc p"><div class="sl">Operations</div><div class="sv" id="ao">—</div></div>
+  </div>
+  <div class="g2">
+    <div class="pnl">
+      <div class="ph"><span class="pt">🔍 Trace Explorer</span>
+        <div style="display:flex;gap:6px">
+          <select class="fs" id="fst" style="width:85px;margin-bottom:0;padding:3px 7px;font-size:9px" onchange="fetchTraces()"><option value="">All</option><option value="error">Errors</option><option value="slow">Slow</option><option value="ok">OK</option></select>
+          <button class="btn bh" onclick="fetchTraces()">↻</button>
+        </div>
+      </div>
+      <div style="padding:8px 12px 0"><input class="fi" id="fsr" placeholder="search spans, tags…" oninput="fetchTraces()" style="margin-bottom:8px"/></div>
+      <div class="scroll" id="tlist" style="max-height:380px"><div class="empty">Enqueue jobs to generate traces</div></div>
+    </div>
+    <div class="pnl">
+      <div class="ph"><span class="pt">🔥 Flamegraph</span><span id="ftitle" style="font-family:var(--mo);font-size:9px;color:var(--mut)">click a trace</span></div>
+      <div class="pb">
+        <div id="fgraph"><div class="empty">Select a trace</div></div>
+        <div id="sdtl" style="display:none;margin-top:10px;padding:9px;background:var(--bg);border:1px solid var(--bor);font-family:var(--mo);font-size:10px;line-height:1.8"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PERFORMANCE ═══════════════ -->
+<div class="pg" id="pg-perf">
+  <div class="sr" style="grid-template-columns:repeat(4,1fr)">
+    <div class="sc c"><div class="sl">Avg Latency</div><div class="sv" id="pa">—</div><div class="ss">ms per job</div></div>
+    <div class="sc y"><div class="sl">P95 Latency</div><div class="sv" id="pp">—</div><div class="ss">ms</div></div>
+    <div class="sc g"><div class="sl">HTTP Requests</div><div class="sv" id="ph2">—</div></div>
+    <div class="sc r"><div class="sl">HTTP Errors</div><div class="sv" id="pe">—</div><div class="ss">5xx</div></div>
+  </div>
+  <div class="pnl">
+    <div class="ph"><span class="pt">📊 Operation Latency — p50 / p95 / p99</span><button class="btn bh" onclick="fetchAgg()">↻</button></div>
+    <div class="pb">
+      <table><thead><tr><th>Operation</th><th>Count</th><th>Avg</th><th>P50</th><th>P95</th><th>P99</th><th>Max</th><th style="width:100px">P95 Bar</th></tr></thead>
+      <tbody id="aggt"><tr><td colspan="8" class="empty">Enqueue jobs first</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ RUNTIME ═══════════════ -->
+<div class="pg" id="pg-rt">
+  <div class="sr" style="grid-template-columns:repeat(4,1fr)">
+    <div class="sc r"><div class="sl">Event Loop Lag</div><div class="sv" id="rlag">—</div><div class="ss">ms (0=healthy)</div></div>
+    <div class="sc y"><div class="sl">Heap Used</div><div class="sv" id="rhp">—</div><div class="ss">MB</div></div>
+    <div class="sc p"><div class="sl">Heap Total</div><div class="sv" id="rht">—</div><div class="ss">MB</div></div>
+    <div class="sc g"><div class="sl">RSS</div><div class="sv" id="rss">—</div><div class="ss">MB</div></div>
+  </div>
+  <div class="g2">
+    <div class="pnl"><div class="ph"><span class="pt">🧠 Heap Over Time</span></div><div class="pb"><canvas id="mc" height="70"></canvas></div></div>
+    <div class="pnl"><div class="ph"><span class="pt">⚡ Event Loop Lag</span></div><div class="pb"><canvas id="lc" height="70"></canvas></div></div>
+  </div>
+  <div class="pnl mt"><div class="ph"><span class="pt">📋 Legend</span></div>
+    <div class="pb" style="font-family:var(--mo);font-size:10px;line-height:2;color:var(--mut)">
+      <div><span style="color:var(--red)">Event Loop Lag</span> — ms behind. &gt;50ms = CPU blocking your server.</div>
+      <div><span style="color:var(--yel)">Heap Used</span> — JS objects in memory. Steadily growing = memory leak.</div>
+      <div><span style="color:var(--pur)">Heap Total</span> — Total V8 heap. Usually 1.5-2x Heap Used.</div>
+      <div><span style="color:var(--grn)">RSS</span> — Total process memory. What Task Manager shows.</div>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+// ── CORE HELPERS ────────────────────────────────────────────────────────────
+const api = () => document.getElementById('aurl').value.replace(/\/$/, '');
+const $   = id  => document.getElementById(id);
+const sv  = (id, v) => { const e = $(id); if (e && e.textContent !== String(v)) e.textContent = v; };
+
+const get = p => fetch(api() + p).then(r => r.json());
+const post = (p, b) => fetch(api() + p, {
+  method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b)
+}).then(r => r.json());
+
+function toast(m, err) {
+  const e = document.createElement('div');
+  e.className = 'toast' + (err ? ' e' : '');
+  e.textContent = m;
+  $('toasts').appendChild(e);
+  setTimeout(() => e.remove(), 4000);
+}
+
+// ── TAB NAVIGATION ──────────────────────────────────────────────────────────
+function showPage(name, el) {
+  document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  $('pg-' + name).classList.add('on');
+  el.classList.add('on');
+  if (name === 'apm')   fetchTraces();
+  if (name === 'perf')  fetchAgg();
+  if (name === 'shop')  initShop();
+}
+
+// ── JOBS PAGE ───────────────────────────────────────────────────────────────
+let done = 0, timer = null, memH = [], loopH = [];
+
+async function fetchAll() {
+  try {
+    const s = await get('/stats');
+    $('dot').className = 'dot';
+    $('stxt').textContent = 'connected';
+    const depth = Object.values(s.queue?.partitions || {}).reduce((a, p) => a + p.streamLength, 0);
+    const pend  = Object.values(s.queue?.partitions || {}).reduce((a, p) => a + p.pendingCount, 0);
+    sv('sc', done); sv('sp', pend); sv('sq', depth);
+    sv('ss2', s.queue?.scheduledCount || 0);
+    sv('sd', s.queue?.dlqSize || 0);
+    sv('sw', s.workers?.workerCount || 0);
+    if (s.workers?.workers?.length) {
+      const t = s.workers.workers.reduce((a, w) => a + w.activeJobs, 0);
+      const c = s.workers.workers.reduce((a, w) => a + w.maxConcurrency, 0);
+      sv('su', ((t / c) * 100).toFixed(0) + '% util');
+    }
+    renderParts(s.queue?.partitions || {});
+    renderWorkers(s.workers);
+    const rt = s.metrics?.runtime;
+    if (rt) {
+      sv('rlag', rt.eventLoopLagMs + 'ms');
+      sv('rhp', rt.heapUsedMB); sv('rht', rt.heapTotalMB); sv('rss', rt.rssMB);
+      memH.push(rt.heapUsedMB); loopH.push(rt.eventLoopLagMs);
+      if (memH.length > 30) memH.shift();
+      if (loopH.length > 30) loopH.shift();
+      drawChart('mc', memH, '#ffb344', v => v + 'MB');
+      drawChart('lc', loopH, '#ff4466', v => v + 'ms');
+    }
+    const lat = s.metrics?.latency;
+    if (lat) { sv('pa', lat.avgMs + 'ms'); sv('pp', lat.p95Ms + 'ms'); }
+    sv('ph2', s.metrics?.runtime?.httpRequests || 0);
+    sv('pe',  s.metrics?.runtime?.httpErrors   || 0);
+    fetchDLQ();
+    try {
+      const a = await get('/apm/stats');
+      sv('at', a.traces?.totalTraces || 0); sv('ae', a.traces?.errorTraces || 0);
+      sv('as', a.traces?.slowTraces  || 0); sv('ao', a.traces?.operations  || 0);
+    } catch(e) {}
+  } catch(e) {
+    $('dot').className = 'dot off';
+    $('stxt').textContent = 'offline';
+  }
+}
+
+function renderParts(parts) {
+  const max = Math.max(...Object.values(parts).map(p => p.streamLength), 1);
+  $('pgrid').innerHTML = Array.from({ length: 8 }, (_, i) => {
+    const p = parts[String(i)] || { streamLength: 0 };
+    return '<div class="pc ' + (p.streamLength > 0 ? 'on' : '') + '">' +
+      '<div class="pcl">P-' + i + '</div>' +
+      '<div class="pcn">' + p.streamLength + '</div>' +
+      '<div class="pbar"><div class="pbf" style="width:' + (p.streamLength / max * 100).toFixed(0) + '%"></div></div>' +
+      '</div>';
+  }).join('');
+}
+
+function renderWorkers(w) {
+  const el = $('wlist');
+  if (!w?.workers?.length) { el.innerHTML = '<div class="empty">No workers</div>'; return; }
+  const tot = w.workers.reduce((a, wk) => a + wk.activeJobs, 0);
+  const cap = w.workers.reduce((a, wk) => a + wk.maxConcurrency, 0);
+  $('wu').textContent = tot + '/' + cap + ' active';
+  el.innerHTML = w.workers.map(wk => {
+    const p = (wk.activeJobs / wk.maxConcurrency * 100).toFixed(0);
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bor)">' +
+      '<span style="font-family:var(--mo);font-size:9px;color:var(--mut);width:65px">wkr-' + (wk.id.split('-')[1] || '?') + '</span>' +
+      '<div style="flex:1;height:4px;background:var(--bor);position:relative;overflow:hidden">' +
+      '<div style="position:absolute;top:0;left:0;bottom:0;width:' + p + '%;background:linear-gradient(90deg,var(--pur),var(--grn));transition:width .4s"></div></div>' +
+      '<span style="font-family:var(--mo);font-size:9px;width:30px;text-align:right">' + p + '%</span></div>';
+  }).join('');
+}
+
+async function fetchDLQ() {
+  try {
+    const { jobs } = await get('/dlq');
+    const el = $('dlqlist');
+    if (!jobs?.length) { el.innerHTML = '<div class="empty">✓ No dead jobs</div>'; return; }
+    el.innerHTML = jobs.filter(Boolean).map(j =>
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bor);gap:8px">' +
+      '<div style="flex:1;min-width:0"><div style="font-family:var(--mo);font-size:9px;color:var(--red);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + j.id + '</div>' +
+      '<div style="font-family:var(--mo);font-size:8px;color:var(--mut);margin-top:2px">' + j.type + ' · ' + j.attempts + ' att</div></div>' +
+      '<button class="btn br" onclick="retryDLQ(\'' + j.id + '\')">↻</button></div>'
+    ).join('');
+  } catch(e) {}
+}
+
+async function retryDLQ(id) { await post('/dlq/' + id + '/retry'); toast('Re-queued from DLQ'); fetchAll(); }
+
+async function enqueue() {
+  let pl;
+  try { pl = JSON.parse($('jpl').value); } catch(e) { toast('Invalid JSON', true); return; }
+  const ra = $('jra').value, dd = $('jdd').value;
+  try {
+    const r = await post('/jobs', {
+      type: $('jt').value, payload: pl,
+      partitionKey: $('jpk').value || 'default',
+      priority: parseInt($('jpr').value),
+      runAt: ra ? new Date(ra).toISOString() : undefined,
+      deduplicationId: dd || undefined,
+    });
+    if (r.duplicate) { toast('Duplicate ignored'); return; }
+    toast('✓ Queued: ' + (r.jobId || '').slice(0, 8) + '…' + (r.scheduled ? ' (sched)' : ''));
+    done++;
+    setTimeout(fetchAll, 400);
+  } catch(e) { toast('Failed: ' + e.message, true); }
+}
+
+async function batch() {
+  const count = parseInt($('jbn').value) || 50;
+  const types = ['send-email', 'process-image', 'send-webhook', 'generate-report'];
+  $('bwrap').style.display = 'block';
+  let n = 0;
+  for (let i = 0; i < count; i += 10) {
+    const chunk = Math.min(10, count - i);
+    await Promise.all(Array.from({ length: chunk }, (_, j) => {
+      const u = Math.floor(Math.random() * 50);
+      return post('/jobs', { type: types[(i + j) % types.length], payload: { userId: u }, partitionKey: 'user-' + u, priority: Math.ceil(Math.random() * 5) });
+    }));
+    n += chunk;
+    $('bbar').style.width = (n / count * 100) + '%';
+    $('blbl').textContent = 'Enqueuing ' + n + '/' + count + '…';
+    await new Promise(r => setTimeout(r, 20));
+  }
+  done += count;
+  toast('✓ ' + count + ' jobs enqueued');
+  $('blbl').textContent = '✓ ' + count + ' done';
+  setTimeout(() => { $('bwrap').style.display = 'none'; fetchAll(); }, 1500);
+}
+
+// ── APM TRACES ──────────────────────────────────────────────────────────────
+async function fetchTraces() {
+  try {
+    const status = $('fst').value, search = $('fsr').value;
+    const p = new URLSearchParams({ limit: 50 });
+    if (status) p.set('status', status);
+    if (search) p.set('search', search);
+    const { traces } = await get('/apm/traces?' + p);
+    const el = $('tlist');
+    if (!traces?.length) { el.innerHTML = '<div class="empty">No traces yet</div>'; return; }
+    el.innerHTML = traces.map(t => {
+      const cls = t.hasError ? 'berr' : 'bok';
+      const lbl = t.hasError ? 'ERR' : 'OK';
+      const name = (t.rootName || '').replace(/</g, '&lt;');
+      const time = new Date(t.startMs).toLocaleTimeString();
+      return '<div class="tr-row" onclick="loadFlame(\'' + t.traceId + '\')">' +
+        '<span class="bd ' + cls + '">' + lbl + '</span>' +
+        '<span class="tr-name">' + name + '</span>' +
+        '<span style="font-family:var(--mo);font-size:9px;color:var(--mut);flex-shrink:0;width:40px;text-align:right">' + t.spanCount + 'sp</span>' +
+        '<span class="tr-dur">' + t.duration + 'ms</span>' +
+        '<span class="tr-t">' + time + '</span></div>';
+    }).join('');
+  } catch(e) {}
+}
+
+async function loadFlame(id) {
+  try {
+    $('ftitle').textContent = id.slice(0, 8) + '…';
+    const { flamegraph } = await get('/apm/traces/' + id + '/flamegraph');
+    renderFlame(flamegraph);
+  } catch(e) { toast('Flamegraph error', true); }
+}
+
+function renderFlame(nodes) {
+  const el = $('fgraph');
+  if (!nodes?.length) { el.innerHTML = '<div class="empty">No spans</div>'; return; }
+  const total = nodes.reduce((s, n) => s + n.value, 0) || 1;
+  const rows = [];
+  function walk(n, d, off) {
+    if (!rows[d]) rows[d] = [];
+    rows[d].push(Object.assign({}, n, { off: off, d: d }));
+    let co = off;
+    (n.children || []).forEach(c => { walk(c, d + 1, co); co += c.value; });
+  }
+  nodes.forEach(n => walk(n, 0, 0));
+  el.innerHTML = rows.map(row =>
+    '<div class="flame-row">' + row.map(s => {
+      const w = Math.max(s.value / total * 100, 0.8).toFixed(2);
+      const ml = (s.off / total * 100).toFixed(2);
+      const cls = s.status === 'error' ? 'ferr' : 'fok';
+      const tip = (s.name || '') + ': ' + (s.value || 0).toFixed(2) + 'ms';
+      return '<div class="fb ' + cls + '" style="width:' + w + '%;margin-left:' + ml + '%" title="' + tip + '" onclick="showSD(this,' + JSON.stringify(s.name) + ',' + (s.value||0).toFixed(2) + ',' + JSON.stringify(s.status) + ')">' +
+        (s.name || '') + ' ' + (s.value || 0).toFixed(1) + 'ms</div>';
+    }).join('') + '</div>'
+  ).join('');
+}
+
+function showSD(el, name, val, status) {
+  const d = $('sdtl');
+  d.style.display = 'block';
+  d.innerHTML = '<b style="color:var(--cyn)">' + name + '</b><br>' +
+    'Duration: <span style="color:var(--grn)">' + val + 'ms</span><br>' +
+    'Status: <span class="bd ' + (status === 'error' ? 'berr' : 'bok') + '">' + status + '</span>';
+}
+
+// ── PERFORMANCE ─────────────────────────────────────────────────────────────
+async function fetchAgg() {
+  try {
+    const a = await get('/apm/aggregations');
+    if (!a?.length) return;
+    const mx = Math.max(...a.map(x => x.p95), 1);
+    $('aggt').innerHTML = a.slice(0, 15).map(x =>
+      '<tr><td style="color:var(--cyn)">' + x.operation + '</td>' +
+      '<td style="color:var(--mut)">' + x.count + '</td>' +
+      '<td>' + x.avg + 'ms</td><td>' + x.p50 + 'ms</td>' +
+      '<td style="color:var(--yel)">' + x.p95 + 'ms</td>' +
+      '<td style="color:var(--red)">' + x.p99 + 'ms</td>' +
+      '<td style="color:var(--mut)">' + x.max + 'ms</td>' +
+      '<td><div class="p95b"><div class="p95f" style="width:' + (x.p95 / mx * 100).toFixed(0) + '%"></div></div></td></tr>'
+    ).join('');
+  } catch(e) {}
+}
+
+// ── RUNTIME CHARTS ───────────────────────────────────────────────────────────
+function drawChart(id, data, color, lbl) {
+  const c = $(id);
+  if (!c || !data.length) return;
+  const W = c.offsetWidth || 400, H = c.height;
+  c.width = W;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+  const max = Math.max(...data, 1);
+  ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+  data.forEach((v, i) => {
+    const x = (i / (data.length - 1 || 1)) * W;
+    const y = H - (v / max) * (H - 4) - 2;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  ctx.globalAlpha = 0.12; ctx.fillStyle = color;
+  ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath(); ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = color; ctx.font = '9px Space Mono';
+  ctx.fillText(lbl(data[data.length - 1]), 3, 12);
+}
+
+// ── SHOP ────────────────────────────────────────────────────────────────────
+let token = localStorage.getItem('sf_token') || null;
+let currentUser = JSON.parse(localStorage.getItem('sf_user') || 'null');
+let allProducts = [];
+let cart = JSON.parse(localStorage.getItem('sf_cart') || '[]');
+
+function authFetch(path, opts) {
+  opts = opts || {};
+  const headers = Object.assign({ 'Content-Type': 'application/json' }, token ? { Authorization: 'Bearer ' + token } : {}, opts.headers || {});
+  return fetch(api() + path, Object.assign({}, opts, { headers })).then(r => r.json());
+}
+
+function authTab(name, el) {
+  document.querySelectorAll('.at').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+  $('login-form').style.display    = name === 'login' ? '' : 'none';
+  $('register-form').style.display = name === 'register' ? '' : 'none';
+}
+
+async function doLogin() {
+  const email = $('l-email').value, pass = $('l-pass').value;
+  if (!email || !pass) return toast('Enter email and password', true);
+  const r = await authFetch('/auth/login', { method: 'POST', body: JSON.stringify({ email, password: pass }) });
+  if (r.error) return toast(r.error, true);
+  saveSession(r.token, r.user);
+  toast('Welcome back, ' + r.user.name + '! 👋');
+  showShopUI();
+}
+
+async function doRegister() {
+  const name = $('r-name').value, email = $('r-email').value, pass = $('r-pass').value;
+  if (!name || !email || !pass) return toast('All fields required', true);
+  const r = await authFetch('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password: pass }) });
+  if (r.error) return toast(r.error, true);
+  saveSession(r.token, r.user);
+  toast('Account created! Welcome ' + r.user.name + ' 🎉');
+  showShopUI();
+}
+
+function doLogout() {
+  token = null; currentUser = null; cart = [];
+  localStorage.removeItem('sf_token'); localStorage.removeItem('sf_user'); localStorage.removeItem('sf_cart');
+  $('auth-section').style.display = ''; $('shop-section').style.display = 'none';
+  toast('Logged out');
+}
+
+function saveSession(t, u) {
+  token = t; currentUser = u;
+  localStorage.setItem('sf_token', t);
+  localStorage.setItem('sf_user', JSON.stringify(u));
+}
+
+function showShopUI() {
+  $('auth-section').style.display  = 'none';
+  $('shop-section').style.display  = '';
+  $('sh-name').textContent  = currentUser?.name  || '—';
+  $('sh-email').textContent = currentUser?.email || '—';
+  loadProducts();
+}
+
+function initShop() {
+  if (token && currentUser) { showShopUI(); } else { $('auth-section').style.display = ''; $('shop-section').style.display = 'none'; }
+  updateCartCount();
+}
+
+function shopTab(name, el) {
+  ['products', 'cart', 'orders', 'reports', 'profile'].forEach(n => $('sh-' + n).style.display = 'none');
+  $('sh-' + name).style.display = '';
+  document.querySelectorAll('#shop-section .at').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+  if (name === 'orders')  loadOrders();
+  if (name === 'reports') loadReports();
+  if (name === 'profile') loadProfile();
+  if (name === 'cart')    renderCart();
+}
+
+async function loadProducts() {
+  try {
+    const r = await authFetch('/products');
+    allProducts = r.products || [];
+    filterProducts();
+  } catch(e) { toast('Could not load products', true); }
+}
+
+function filterProducts() {
+  const search = ($('prod-search')?.value || '').toLowerCase();
+  const cat    = $('prod-cat')?.value || '';
+  let list = allProducts;
+  if (search) list = list.filter(p => p.name.toLowerCase().includes(search));
+  if (cat)    list = list.filter(p => p.category === cat);
+  renderProducts(list);
+}
+
+function renderProducts(list) {
+  const el = $('prod-grid');
+  if (!list.length) { el.innerHTML = '<div class="empty">No products found</div>'; return; }
+  const inCart = new Set(cart.map(c => c.productId));
+  el.innerHTML = list.map(p =>
+    '<div class="prod-card ' + (inCart.has(p.id) ? 'sel' : '') + '">' +
+    '<div class="prod-cat">' + p.category + '</div>' +
+    '<div class="prod-name">' + p.name + '</div>' +
+    '<div class="prod-price">₹' + (p.price / 100).toFixed(2) + '</div>' +
+    '<div style="font-family:var(--mo);font-size:9px;color:var(--yel);margin-top:6px">Stock: ' + p.stock + '</div>' +
+    '<button class="btn ' + (inCart.has(p.id) ? 'bh' : 'bg') + '" style="margin-top:10px;font-size:10px" onclick="addToCart(\'' + p.id + '\')">' +
+    (inCart.has(p.id) ? '✓ In Cart' : '+ Add to Cart') + '</button></div>'
+  ).join('');
+}
+
+function addToCart(productId) {
+  const product = allProducts.find(p => p.id === productId);
+  if (!product) return;
+  const existing = cart.find(c => c.productId === productId);
+  if (existing) { existing.quantity++; } else { cart.push({ productId, name: product.name, price: product.price, quantity: 1 }); }
+  localStorage.setItem('sf_cart', JSON.stringify(cart));
+  updateCartCount();
+  filterProducts();
+  toast('Added "' + product.name + '" to cart 🛒');
+}
+
+function removeFromCart(productId) {
+  cart = cart.filter(c => c.productId !== productId);
+  localStorage.setItem('sf_cart', JSON.stringify(cart));
+  updateCartCount(); renderCart(); filterProducts();
+}
+
+function changeQty(productId, delta) {
+  const item = cart.find(c => c.productId === productId);
+  if (!item) return;
+  item.quantity += delta;
+  if (item.quantity <= 0) return removeFromCart(productId);
+  localStorage.setItem('sf_cart', JSON.stringify(cart));
+  renderCart();
+}
+
+function updateCartCount() {
+  const total = cart.reduce((s, c) => s + c.quantity, 0);
+  $('cart-count').textContent = total > 0 ? '(' + total + ')' : '';
+}
+
+function renderCart() {
+  const el = $('cart-items');
+  if (!cart.length) {
+    el.innerHTML = '<div class="empty">Cart is empty — add products first</div>';
+    $('cart-summary').innerHTML = '<div style="color:var(--mut)">Add items to see summary</div>';
+    return;
+  }
+  el.innerHTML = cart.map(c =>
+    '<div class="cart-item">' +
+    '<div style="flex:1"><div style="font-size:13px;font-weight:700">' + c.name + '</div>' +
+    '<div style="font-family:var(--mo);font-size:10px;color:var(--grn)">₹' + (c.price / 100).toFixed(2) + ' each</div></div>' +
+    '<div style="display:flex;align-items:center;gap:8px">' +
+    '<button class="qbtn" onclick="changeQty(\'' + c.productId + '\',-1)">−</button>' +
+    '<span style="font-family:var(--mo);font-size:12px;width:20px;text-align:center">' + c.quantity + '</span>' +
+    '<button class="qbtn" onclick="changeQty(\'' + c.productId + '\',1)">+</button>' +
+    '<button class="btn br" style="margin-left:4px" onclick="removeFromCart(\'' + c.productId + '\')">✕</button></div></div>'
+  ).join('');
+  const sub = cart.reduce((s, c) => s + c.price * c.quantity, 0);
+  const tax = Math.round(sub * 0.18);
+  const tot = sub + tax;
+  $('cart-summary').innerHTML =
+    '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--mut)">Subtotal</span><span>₹' + (sub/100).toFixed(2) + '</span></div>' +
+    '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--mut)">GST (18%)</span><span>₹' + (tax/100).toFixed(2) + '</span></div>' +
+    '<div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:var(--grn);border-top:1px solid var(--bor);padding-top:8px;margin-top:8px"><span>Total</span><span>₹' + (tot/100).toFixed(2) + '</span></div>';
+}
+
+async function placeOrder() {
+  if (!token) return toast('Please login first', true);
+  if (!cart.length) return toast('Cart is empty', true);
+  const addr = $('sh-addr').value;
+  if (!addr) return toast('Enter shipping address', true);
+  $('place-btn').textContent = 'Placing…';
+  $('place-btn').disabled = true;
+  try {
+    const r = await authFetch('/orders', {
+      method: 'POST',
+      body: JSON.stringify({ items: cart.map(c => ({ productId: c.productId, quantity: c.quantity })), shippingAddress: addr }),
+    });
+    if (r.error) { toast(r.error, true); return; }
+    toast('✅ Order placed! ' + (r.backgroundJobs?.length || 3) + ' background jobs fired 🚀');
+    cart = []; localStorage.setItem('sf_cart', JSON.stringify(cart));
+    updateCartCount(); renderCart();
+    done += (r.backgroundJobs?.length || 3);
+    setTimeout(fetchAll, 500);
+  } catch(e) { toast('Order failed: ' + e.message, true); }
+  finally { $('place-btn').textContent = '🛒 Place Order'; $('place-btn').disabled = false; }
+}
+
+async function loadOrders() {
+  if (!token) return;
+  try {
+    const r = await authFetch('/orders/my');
+    const el = $('orders-list');
+    if (!r.orders?.length) { el.innerHTML = '<div class="empty">No orders yet</div>'; return; }
+    el.innerHTML = [...r.orders].reverse().map(o =>
+      '<div class="order-card">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center">' +
+      '<div><div style="font-family:var(--mo);font-size:10px;color:var(--pur)">#' + o.id.slice(0,8).toUpperCase() + '</div>' +
+      '<div style="font-family:var(--mo);font-size:9px;color:var(--mut);margin-top:2px">' + new Date(o.createdAt).toLocaleString() + '</div></div>' +
+      '<div style="text-align:right"><div style="font-family:var(--mo);font-size:14px;color:var(--grn);font-weight:700">₹' + (o.total/100).toFixed(2) + '</div>' +
+      '<div style="font-family:var(--mo);font-size:9px;text-transform:uppercase;color:' + (o.status==='confirmed'?'var(--yel)':'var(--grn)') + '">' + o.status + '</div></div></div>' +
+      '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bor)">' +
+      o.items.map(i => '<div style="font-family:var(--mo);font-size:10px;display:flex;justify-content:space-between;margin-bottom:3px"><span>' + i.name + ' ×' + i.quantity + '</span><span style="color:var(--grn)">₹' + (i.price*i.quantity/100).toFixed(2) + '</span></div>').join('') +
+      '</div>' +
+      '<div style="margin-top:6px;display:flex;gap:10px">' +
+      (o.invoiceUrl ? '<span style="font-family:var(--mo);font-size:9px;color:var(--grn)">📄 Invoice ready</span>' : '<span style="font-family:var(--mo);font-size:9px;color:var(--mut)">⏳ Invoice pending</span>') +
+      (o.webhookSent ? '<span style="font-family:var(--mo);font-size:9px;color:var(--pur)">🔔 Webhook sent</span>' : '') +
+      '</div></div>'
+    ).join('');
+  } catch(e) {}
+}
+
+async function generateReport() {
+  if (!token) return toast('Please login first', true);
+  const type = $('rep-type').value;
+  try {
+    const r = await authFetch('/reports/generate', { method: 'POST', body: JSON.stringify({ type }) });
+    if (r.error) return toast(r.error, true);
+    toast('📊 Report queued! Job: ' + (r.jobId || '').slice(0,8) + '…');
+    done++;
+    setTimeout(() => { loadReports(); fetchAll(); }, 1500);
+  } catch(e) { toast('Report failed', true); }
+}
+
+async function loadReports() {
+  if (!token) return;
+  try {
+    const r = await authFetch('/reports');
+    const el = $('reports-list');
+    if (!r.reports?.length) { el.innerHTML = '<div class="empty">No reports yet</div>'; return; }
+    el.innerHTML = [...r.reports].reverse().map(rep =>
+      '<div style="padding:10px 0;border-bottom:1px solid var(--bor)">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center">' +
+      '<div><div style="font-family:var(--mo);font-size:10px;color:var(--pur)">' + rep.type + '</div>' +
+      '<div style="font-family:var(--mo);font-size:9px;color:var(--mut);margin-top:2px">' + new Date(rep.createdAt).toLocaleString() + '</div></div>' +
+      '<span class="bd ' + (rep.status==='ready'?'bok':rep.status==='pending'?'brun':'berr') + '">' + rep.status + '</span>' +
+      '</div>' + (rep.url ? '<div style="font-family:var(--mo);font-size:9px;color:var(--grn);margin-top:6px">📄 ' + rep.url + '</div>' : '') + '</div>'
+    ).join('');
+  } catch(e) {}
+}
+
+async function loadProfile() {
+  if (!token) return;
+  try {
+    const [pr, st] = await Promise.all([authFetch('/users/me'), authFetch('/users/me/stats')]);
+    if (pr.user) { $('p-name').value = pr.user.name; $('p-email').value = pr.user.email; }
+    if (st) {
+      $('profile-stats').innerHTML =
+        '<div style="font-family:var(--mo);font-size:11px;line-height:2.4">' +
+        '<div style="display:flex;justify-content:space-between"><span style="color:var(--mut)">Total Orders</span><span style="color:var(--grn)">' + st.totalOrders + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between"><span style="color:var(--mut)">Total Spent</span><span style="color:var(--grn)">₹' + (st.totalSpent/100).toFixed(2) + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between"><span style="color:var(--mut)">Items Purchased</span><span style="color:var(--pur)">' + st.totalItems + '</span></div></div>';
+    }
+  } catch(e) {}
+}
+
+async function updateProfile() {
+  const name = $('p-name').value, email = $('p-email').value;
+  try {
+    const r = await authFetch('/users/me', { method: 'PUT', body: JSON.stringify({ name, email }) });
+    if (r.error) return toast(r.error, true);
+    currentUser = Object.assign({}, currentUser, { name: r.user.name, email: r.user.email });
+    localStorage.setItem('sf_user', JSON.stringify(currentUser));
+    $('sh-name').textContent  = currentUser.name;
+    $('sh-email').textContent = currentUser.email;
+    toast('Profile updated ✓');
+  } catch(e) { toast('Update failed', true); }
+}
+
+// ── BOOT ────────────────────────────────────────────────────────────────────
+fetchAll();
+initShop();
+clearInterval(timer);
+timer = setInterval(function() {
+  fetchAll();
+  if ($('pg-apm').classList.contains('on')) fetchTraces();
+  if ($('pg-perf').classList.contains('on')) fetchAgg();
+}, 3000);
+</script>
+</body>
+</html>
