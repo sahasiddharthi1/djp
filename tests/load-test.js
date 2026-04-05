@@ -3,8 +3,7 @@
  * Run: npm test   (server must be running first: npm start)
  */
 
-const BASE = process.env.API_URL || 'http://localhost:3000';
-
+const BASE = process.env.API_URL || 'https://djp-yc84.onrender.com';
 const post = (path, body) =>
   fetch(`${BASE}${path}`, {
     method:  'POST',
