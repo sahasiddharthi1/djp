@@ -305,7 +305,7 @@ async function main() {
 
   // ── HTTP API ───────────────────────────────────────────────────────────
   const app  = createAPI(pool);
-  const PORT = parseInt(process.env.API_PORT || '3000');
+  const PORT = parseInt(process.env.PORT || process.env.API_PORT || '3000');
 
   app.listen(PORT, () => {
     console.log('');
